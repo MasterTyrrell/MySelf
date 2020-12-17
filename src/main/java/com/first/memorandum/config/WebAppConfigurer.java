@@ -14,7 +14,7 @@ import java.util.List;
 public class WebAppConfigurer implements WebMvcConfigurer {
 
 
-    private List<String> excludePathPatternList = Arrays.asList("/login/*","/error","/**.ico","/test1");
+    private List<String> excludePathPatternList = Arrays.asList("/login/*","/error","/**.ico","/test1","/outer/**");
     @Override
     public  void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginStatusCheckAdapter()).addPathPatterns("/**").excludePathPatterns(excludePathPatternList);

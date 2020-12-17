@@ -12,6 +12,8 @@ public class Parameter {
 
     public static final String LOGIN_PREFIX = "LOGIN:";
 
+    public static final String AUTH_EMAIL_PREFIX = "AUTH_EMAIL:";
+
     public static final String TOKEN_PREFIX = "TOKEN:";
 
     public static final String REQUEST_INFO_HEADER_TOKEN_NAME="token";

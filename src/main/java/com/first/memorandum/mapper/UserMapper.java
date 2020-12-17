@@ -1,15 +1,14 @@
 package com.first.memorandum.mapper;
 
 import com.first.memorandum.entity.User;
-import com.first.memorandum.enumfolder.UserStatusEnum;
 import org.apache.ibatis.annotations.*;
 
-import java.util.List;
 
 
 public interface UserMapper {
 
     @Results({
+            @Result(property = "id",column = "id"),
             @Result(property = "userName",column = "userName"),
             @Result(property = "password",column = "password"),
             @Result(property = "mobileNo",column = "mobileNo"),
@@ -18,7 +17,10 @@ public interface UserMapper {
             @Result(property = "email",column = "email"),
             @Result(property = "delFlag",column = "delFlag"),
             @Result(property = "createTime",column = "createTime"),
-            @Result(property = "updateTime",column = "updateTime")
+            @Result(property = "updateTime",column = "updateTime"),
+            @Result(property = "userNo",column = "userNo"),
+            @Result(property = "updateTime",column = "updateTime"),
+            @Result(property = "status",column = "status")
     })
     @Select("<script>" +
             " SELECT * FROM user " +
@@ -35,17 +37,23 @@ public interface UserMapper {
             " limit 1 </script>")
     User getUserByMobileNo(String mobileNo,Boolean delFlag,Integer status,String password);
 
-    @Insert("INSERT INTO USER(userName,password,mobileNo,status,imageUrl,email,delFlag,createTime,updateTime,userType) values(#{userName},#{password},#{mobileNo},#{status},#{imageUrl},#{email},#{delFlag},#{createTime},#{updateTime},#{userType})")
+    @Insert("INSERT INTO user(userNo,userName,password,mobileNo,status,imageUrl,email,delFlag,createTime,updateTime,userType) values(#{userNo},#{userName},#{password},#{mobileNo},#{status},#{imageUrl},#{email},#{delFlag},#{createTime},#{updateTime},#{userType})")
     Integer insertUser(User user);
 
     @Update("<script>" +
-            "UPDATE user SET password=#{newPassword} WHERE mobileNo = #{mobileNo} " +
+            "UPDATE user SET password=#{newPassword},updateTime=now() WHERE mobileNo = #{mobileNo} " +
             "<if test='oldPassword!=null'>" +
             "AND password = #{oldPassword} " +
             "</if> " +
             "</script>")
     Integer updateUserPassword(String mobileNo,String oldPassword,String newPassword);
 
-    @Update("UPDATE user SET userName = #{userName} WHERE mobileNo = #{mobileNo} ")
+    @Update("UPDATE user SET userName = #{userName},updateTime=now() WHERE mobileNo = #{mobileNo} ")
     Integer updateUserName(String userName,String mobileNo);
+
+    @Update("UPDATE user SET email = #{email},updateTime=now() where mobileNo = #{mobileNo}")
+    Integer updateEmailByMobileNo(String mobileNo,String email);
+
+    @Select("SELECT userNo from user where mobileNo=#{mobileNo}")
+    String getUserNoByMobileNo(String mobileNo);
 }

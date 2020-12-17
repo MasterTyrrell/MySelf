@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.first.memorandum.mapper.NotesMapper">
+
+    <resultMap id="BaseResultMap" type="com.first.memorandum.entity.Notes">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="userNo" jdbcType="VARCHAR" property="userNo"></result>
+        <result column="topic" jdbcType="VARCHAR" property="topic"></result>
+        <result column="content" jdbcType="VARCHAR" property="content"></result>
+        <result column="version" jdbcType="INTEGER" property="version"></result>
+        <result column="createTime" jdbcType="DATE" property="createTime"></result>
+        <result column="updateTime" jdbcType="DATE" property="updateTime"></result>
+        <result column="delFlag" jdbcType="TINYINT" property="delFlag"></result>
+        <result column="noteNo" jdbcType="VARCHAR" property="noteNo"></result>
+    </resultMap>
+
+    <insert id="addNotes" parameterType="com.first.memorandum.entity.Notes">
+        INSERT INTO notes (userNo,topic,content,version,createTime,updateTime,delFlag,noteNo) VALUES(#{userNo},#{topic},#{content},#{version},#{createTime},#{updateTime},#{delFlag},#{noteNo})
+    </insert>
+
+    <update id="deleteNotes" >
+        UPDATE notes SET delFlag = true where userNo=#{userNo} and noteNo=#{noteNo};
+    </update>
+
+    <update id="updateNotes" parameterType="com.first.memorandum.entity.Notes">
+        UPDATE  notes  SET
+        <if test="notes.topic!=null">
+         topic = #{notes.topic},
+        </if>
+        <if test="notes.content!=null">
+         content = #{notes.content},
+        </if>
+         updateTime =now()
+        where userNo=#{userNo} and noteNo=#{notes.noteNo};
+    </update>
+
+    <select id="ListNotesByUserNo" resultMap="BaseResultMap">
+        SELECT * FROM notes where delFlag = false AND userNo = #{userNo} limit #{pageStart},#{pageSize};
+    </select>
+
+    <select id="countNotesList" resultType="long">
+        select count(1) from notes where userNo = #{userNo};
+    </select>
+</mapper>

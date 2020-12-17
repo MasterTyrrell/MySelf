@@ -9,4 +9,7 @@ public interface UserService {
 
     JsonContent modifyUserName(String userName,String mobileNo);
 
+    JsonContent sendAuthEmail(String email, String mobileNo);
+
+    Boolean authEmail(String token);
 }

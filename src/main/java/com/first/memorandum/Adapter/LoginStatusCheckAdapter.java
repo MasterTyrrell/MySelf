@@ -24,18 +24,18 @@ public class LoginStatusCheckAdapter implements HandlerInterceptor {
     public  boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
         String token = request.getHeader(REQUEST_INFO_HEADER_TOKEN_NAME);
-        String mobileNo = getUserLoginMobileNo(token);
+        String mobileNo = getUserLoginMobileNo(token,request);
         if(StringUtils.isBlank(mobileNo)){
             response.setContentType("application/json;charset=UTF-8");
             PrintWriter printWriter = response.getWriter();
             printWriter.write(new JSONObject(new JsonContent(LOGIN_TIMEOUT)).toString());
             return false;
         }
-        request.getSession().setAttribute("mobileNo",mobileNo);
+
         return true;
     }
 
-    private String getUserLoginMobileNo(String token){
+    private String getUserLoginMobileNo(String token,HttpServletRequest request){
         if(StringUtils.isBlank(token)){
             return null;
         }
@@ -43,8 +43,19 @@ public class LoginStatusCheckAdapter implements HandlerInterceptor {
         if(StringUtils.isBlank(mobileNo)){
             return null;
         }
-        String newestToken = redisTemplate.opsForValue().get(TOKEN_PREFIX+mobileNo);
+        String tokenValue = redisTemplate.opsForValue().get(TOKEN_PREFIX+mobileNo);
+        if(StringUtils.isBlank(tokenValue)){
+            return null;
+        }
+        String[] tokenArray = tokenValue.split(REDIS_SEPERATE);
+        if(token==null||tokenArray.length<2){
+            return null;
+        }
+        String newestToken = tokenArray[0];
+        String userNo = tokenArray[1];
         if(token.equals(newestToken)){
+            request.getSession().setAttribute("mobileNo",mobileNo);
+            request.getSession().setAttribute("userNo",userNo);
             redisTemplate.expire(LOGIN_PREFIX+token,LOGIN_TIMEOUT_NUM, LOGIN_TIMEOUT_UNIT);
             return mobileNo;
         }

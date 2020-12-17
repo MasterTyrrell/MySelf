@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.first.memorandum.entity.Tip">
+
+    <resultMap id="BaseResultMap" type="com.first.memorandum.entity.Tip">
+        <result column="id" jdbcType="BIGINT" property="id" />
+        <result column="createTime" jdbcType="DATE" property="createTime"></result>
+        <result column="updateTime" jdbcType="DATE" property="updateTime"></result>
+        <result column="delFlag" jdbcType="TINYINT" property="delFlag"></result>
+        <result column="userNo" jdbcType="VARCHAR" property="userNo"></result>
+        <result column="tipNo" jdbcType="VARCHAR" property="tipNo"></result>
+        <result column="topic" jdbcType="VARCHAR" property="topic"></result>
+        <result column="content" jdbcType="VARCHAR" property="content"></result>
+        <result column="timestampstr" jdbcType="VARCHAR" property="timestampstr"></result>
+        <result column="tipCycle" jdbcType="TINYINT" property="tipCycle"></result>
+        <result column="status" jdbcType="TINYINT" property="status"></result>
+        <result column="version" jdbcType="INTEGER" property="version"></result>
+    </resultMap>
+
+    <insert id="addTip" parameterType="com.first.memorandum.entity.Tip">
+        INSERT INTO tip (createTime,updateTime,delFlag,userNo,tipNo,topic,content,timestampstr,tipCycle,status,version)
+         VALUES(#{createTime},#{updateTime},#{delFlag},#{userNo},#{tipNo},#{topic},#{content},#{timestampstr},#{tipCycle},#{status},#{version})
+    </insert>
+
+    <update id="deleteTip" >
+        UPDATE tip SET delFlag = true where userNo=#{userNo} and tipNo=#{tipNo};
+    </update>
+
+    <update id="updateTip" parameterType="com.first.memorandum.entity.Tip">
+        UPDATE  tip  SET
+        <if test="tip.topic!=null">
+         topic = #{tip.topic},
+        </if>
+        <if test="tip.content!=null">
+         content = #{tip.content},
+        </if>
+        <if test="tip.timestampstr!=null">
+        timestampstr = #{tip.timestampstr},
+        </if>
+        <if test="tip.tipCycle!=null">
+        tipCycle = #{tip.tipCycle},
+        </if>
+        <if test="tip.status!=null">
+        status = #{tip.status},
+        </if>
+         updateTime =now()
+        where userNo=#{userNo} and tipNo=#{tip.tipNo};
+    </update>
+
+    <select id="ListTipsByUserNo" resultMap="BaseResultMap">
+        SELECT * FROM tip where delFlag = false AND userNo = #{userNo} limit #{pageStart},#{pageSize};
+    </select>
+
+    <select id="countTipsList" resultType="long">
+        select count(1) from tip where userNo = #{userNo};
+    </select>
+</mapper>

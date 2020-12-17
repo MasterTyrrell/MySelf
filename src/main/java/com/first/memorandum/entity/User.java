@@ -3,6 +3,7 @@ import java.time.LocalDateTime;
 
 public class User extends AbstactEntity {
 
+    private String userNo;
     private String userName;
     private String password;
     private String mobileNo;
@@ -12,10 +13,12 @@ public class User extends AbstactEntity {
     private String token;
     private Integer userType;
 
-    public User(){
-        super.setCreateTime(LocalDateTime.now());
-        super.setUpdateTime(LocalDateTime.now());
-        super.setDelFlag(false);
+    public String getUserNo() {
+        return userNo;
+    }
+
+    public void setUserNo(String userNo) {
+        this.userNo = userNo;
     }
 
     public String getUserName() {

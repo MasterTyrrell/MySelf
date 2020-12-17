@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestTemplate;
 
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +42,8 @@ public class LoginServiceImpl implements LoginService {
     private String key;
     @Value("${sms.ip}")
     private String ip;
+    @Value("${defaultImg}")
+    private String defaultImg;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
@@ -127,7 +131,7 @@ public class LoginServiceImpl implements LoginService {
        String oldToken =  redisTemplate.opsForValue().get(TOKEN_PREFIX + getUser.getMobileNo());
         redisTemplate.delete(LOGIN_PREFIX + oldToken);
        redisTemplate.opsForValue().set(LOGIN_PREFIX + getUser.getToken(),getUser.getMobileNo(),LOGIN_TIMEOUT_NUM,LOGIN_TIMEOUT_UNIT);
-        redisTemplate.opsForValue().set( TOKEN_PREFIX + getUser.getMobileNo(),getUser.getToken());
+        redisTemplate.opsForValue().set( TOKEN_PREFIX + getUser.getMobileNo(),getUser.getToken()+ REDIS_SEPERATE + getUser.getUserNo(),LOGIN_TIMEOUT_NUM,LOGIN_TIMEOUT_UNIT);
         user.setPassword(null);
         return new JsonContent(SUCCESS,getUser);
     }
@@ -152,8 +156,36 @@ public class LoginServiceImpl implements LoginService {
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
         user.setUserType(UserTypeEnum.USER.getCode());
-        Integer num = userMapper.insertUser(user);
+        user.setImageUrl(defaultImg);
+        //从redis中获取用户号
+        String userNo = redisTemplate.opsForValue().get("userNo");
+        if(userNo==null){
+            userNo = "0";
+        }
+        user.setUserNo(StringUtils.leftPad(userNo,19,"0"));
+        Boolean flag = true;
+        Integer num = 0;
+        while(flag) {
+            try {
+                num = userMapper.insertUser(user);
+                flag = false;
+            }catch (DuplicateKeyException e){
+                String newUserNo = redisTemplate.opsForValue().get("userNo");
+                if(newUserNo!=null&&(userNo.equals(newUserNo))){
+                    redisTemplate.opsForValue().increment("userNo");
+                    userNo = String.valueOf(Integer.valueOf(userNo)+1);
+                    user.setUserNo(StringUtils.leftPad(userNo,19,"0"));
+                }else if(newUserNo==null||Integer.valueOf(newUserNo).compareTo(Integer.valueOf(userNo))<0){
+                    userNo = String.valueOf(Integer.valueOf(userNo)+1);
+                    user.setUserNo(StringUtils.leftPad(userNo,19,"0"));
+                    redisTemplate.opsForValue().set("userNo",userNo);
+                }else{
+                    user.setUserNo(StringUtils.leftPad(newUserNo,19,"0"));
+                }
+            }
+        }
         if(num>0){
+            redisTemplate.opsForValue().increment("userNo");
             return new JsonContent(SUCCESS);
         }
         return new JsonContent(FAILED);
@@ -163,8 +195,9 @@ public class LoginServiceImpl implements LoginService {
         if(key==null||max==null){
             return true;
         }
-        Integer num = Integer.valueOf(redisTemplate.opsForValue().get(key));
-        if(num!=null){
+        String numStr = redisTemplate.opsForValue().get(key);
+        if(numStr!=null){
+            Integer num = Integer.valueOf(numStr);
             if(num>=max){
                 return true;
             }
