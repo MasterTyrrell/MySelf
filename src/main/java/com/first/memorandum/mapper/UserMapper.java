@@ -24,7 +24,7 @@ public interface UserMapper {
     })
     @Select("<script>" +
             " SELECT * FROM user " +
-            "where 1=1 and  mobileNo = #{mobileNo}  " +
+            "where  mobileNo = #{mobileNo}  " +
             "<if test='delFlag!=null'>" +
             "AND delFlag = #{delFlag}" +
             "</if>" +
@@ -34,7 +34,7 @@ public interface UserMapper {
             "<if test='password!=null'>" +
             "AND password = #{password}" +
             "</if>" +
-            " limit 1 </script>")
+            "</script>")
     User getUserByMobileNo(String mobileNo,Boolean delFlag,Integer status,String password);
 
     @Insert("INSERT INTO user(userNo,userName,password,mobileNo,status,imageUrl,email,delFlag,createTime,updateTime,userType) values(#{userNo},#{userName},#{password},#{mobileNo},#{status},#{imageUrl},#{email},#{delFlag},#{createTime},#{updateTime},#{userType})")

@@ -34,7 +34,9 @@ public class NotesServiceImpl implements NotesService {
         note.setVersion(0);
         Integer num = notesMapper.addNotes(note);
         if(num>0){
-            return new JsonContent(ResponseEnum.SUCCESS);
+            JsonContent result = new JsonContent(ResponseEnum.SUCCESS);
+            result.setResult(note);
+            return result;
         }
         return new JsonContent(ResponseEnum.FAILED);
     }

@@ -30,7 +30,7 @@ public class SqlSessionFactoryConfig {
 
     @Bean("myDataSource")
     public DataSource myDataSource(JdbcProperties properties){
-        DruidDataSource  dataSource = new DruidDataSource();
+        DruidDataSource dataSource = new DruidDataSource();
         dataSource.setDbType(properties.getType());
         dataSource.setUrl(properties.getUrl());
         dataSource.setUsername(properties.getUserName());

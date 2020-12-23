@@ -21,9 +21,4 @@ public class TestController {
           return "12345";
       }
 
-    public static void main(String[] args) {
-
-        System.out.println(DigestUtils.md5DigestAsHex("12345".getBytes()).length());
-        System.out.println(DigestUtils.md5DigestAsHex("123456".getBytes()).length());
-    }
 }

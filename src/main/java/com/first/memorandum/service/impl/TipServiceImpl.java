@@ -43,7 +43,9 @@ public class TipServiceImpl implements TipService {
         tip.setUserNo(userNo);
         Integer num = sqlSessionTemplate.insert(Tip.class.getName()+".addTip",tip);
         if(num>0){
-            return new JsonContent(SUCCESS);
+            JsonContent result = new JsonContent(SUCCESS);
+            result.setResult(tip);
+            return result;
         }
         return new JsonContent(FAILED);
     }
